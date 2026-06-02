@@ -1,0 +1,45 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=Syne:wght@400;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@layer utilities {
+  .will-change-transform {
+    will-change: transform;
+    transform: translateZ(0); /* Hack to force GPU layer */
+    backface-visibility: hidden;
+  }
+}
+/* Custom Global Styles */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Hide Scrollbar */
+::-webkit-scrollbar {
+  width: 0px;
+  background: transparent;
+}
+
+/* Map Filter */
+.map-filter {
+  filter: grayscale(100%) contrast(1.2) sepia(10%) hue-rotate(320deg);
+}
+
+/* Horizontal Scroll Hiding */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+/* OPTIMIZATION: Disable backdrop-blur on low-end devices/mobile to save GPU */
+@media (max-width: 768px), (prefers-reduced-motion: reduce) {
+  .backdrop-blur-md, 
+  .backdrop-blur-xl, 
+  .backdrop-blur-2xl {
+    backdrop-filter: none !important;
+    background-color: rgba(10, 10, 10, 0.95) !important; /* Fallback to solid dark */
+  }
+}

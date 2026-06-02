@@ -10,7 +10,7 @@ const Footer = () => (
         <h2 className="text-5xl md:text-7xl lg:text-8xl font-display font-bold leading-[0.9] mb-8 md:mb-12 text-white">
           READY TO
           <br />
-          <span className="text-primary">SHINE?</span>
+          <span className="text-primary">SHINE?.</span>
         </h2>
 
         <div className="flex flex-col gap-4 md:gap-6">

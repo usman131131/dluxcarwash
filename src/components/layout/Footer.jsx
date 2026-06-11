@@ -33,9 +33,7 @@ const Footer = () => (
             target="_blank"
             rel="noopener noreferrer"
           >
-            <span className="text-lg md:text-xl font-bold">
-              Text Us After Hours
-            </span>
+            <span className="text-lg md:text-xl font-bold">Call Now</span>
             <span className="text-lg md:text-xl font-mono">0410 111 190</span>
           </a>
 

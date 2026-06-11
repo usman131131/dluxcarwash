@@ -15,7 +15,7 @@ const Footer = () => (
 
         <div className="flex flex-col gap-4 md:gap-6">
           {/* Call Button */}
-          <a
+          {/* <a
             href="tel:0393149645"
             className="flex items-center justify-between p-6 md:p-8 border border-white/20 hover:bg-primary hover:border-primary hover:text-white transition group"
           >
@@ -25,7 +25,7 @@ const Footer = () => (
             <span className="text-lg md:text-xl font-mono">
               +61 430 585 538
             </span>
-          </a>
+          </a> */}
           {/* Text Button */}
           <a
             href="https://wa.me/61410111190"

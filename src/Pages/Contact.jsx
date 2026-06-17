@@ -133,7 +133,7 @@ const Contact = () => {
                 </span>
               </div>
             </div>
-            <div className="flex items-center gap-4">
+            {/* <div className="flex items-center gap-4">
               <div className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-primary shrink-0">
                 <i className="fa-solid fa-phone"></i>
               </div>
@@ -145,7 +145,7 @@ const Contact = () => {
                   +61 430 585 538
                 </span>
               </div>
-            </div>
+            </div> */}
             <div className="flex items-center gap-4">
               <div className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-primary shrink-0">
                 <i className="fa-solid fa-message"></i>

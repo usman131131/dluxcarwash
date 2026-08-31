@@ -1,6 +1,46 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import SEO from "../components/layout/SEO";
 import SuccessMessage from "../components/Success/SuccessMessage";
+
+const SYDNEY_TIME_ZONE = "Australia/Sydney";
+
+const getSydneyDateParts = () => {
+  const parts = new Intl.DateTimeFormat("en-AU", {
+    timeZone: SYDNEY_TIME_ZONE,
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+    hour: "numeric",
+    hourCycle: "h23",
+  }).formatToParts(new Date());
+
+  const values = Object.fromEntries(
+    parts
+      .filter((part) => part.type !== "literal")
+      .map((part) => [part.type, part.value])
+  );
+
+  return {
+    year: Number(values.year),
+    monthIndex: Number(values.month) - 1,
+    day: Number(values.day),
+    hour: Number(values.hour),
+  };
+};
+
+const getMonthValue = (year, monthIndex) => {
+  const date = new Date(year, monthIndex, 1);
+
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+};
+
+const getMonthLabel = (year, monthIndex) =>
+  new Date(year, monthIndex, 1).toLocaleString("en-AU", { month: "long" });
+
+const getCurrentSydneyMonthValue = () => {
+  const now = getSydneyDateParts();
+  return getMonthValue(now.year, now.monthIndex);
+};
 
 const Booking = () => {
   const [formData, setFormData] = useState({
@@ -10,7 +50,7 @@ const Booking = () => {
     service: "",
     drivewayPackage: "", // New Field for Driveway sub-options
     day: "",
-    month: new Date().toLocaleString("default", { month: "long" }),
+    month: getCurrentSydneyMonthValue(),
     time: "",
     message: "",
   });
@@ -34,35 +74,57 @@ const Booking = () => {
     "Valet & Interior Works"
   ];
 
-  // ... (Date Logic remains same: getAuTime, months, getAvailableDays, getAvailableTimes) ...
-  const getAuTime = () => new Date(new Date().toLocaleString("en-US", { timeZone: "Australia/Sydney" }));
-  const months = [0, 1, 2].map((i) => {
-    const d = getAuTime();
-    d.setMonth(d.getMonth() + i);
-    return d.toLocaleString("default", { month: "long" });
+  // Scheduling is based on Australia/Sydney time.
+  // Month values use YYYY-MM so they remain unique and never roll over
+  // incorrectly on the 29th, 30th, or 31st of a month.
+  const sydneyNow = getSydneyDateParts();
+
+  const months = [0, 1, 2].map((offset) => {
+    const date = new Date(sydneyNow.year, sydneyNow.monthIndex + offset, 1);
+
+    return {
+      value: getMonthValue(date.getFullYear(), date.getMonth()),
+      label: getMonthLabel(date.getFullYear(), date.getMonth()),
+      year: date.getFullYear(),
+      monthIndex: date.getMonth(),
+    };
   });
-  
+
+  const selectedMonth =
+    months.find((month) => month.value === formData.month) || months[0];
+
+  const currentSydneyMonthValue = getMonthValue(
+    sydneyNow.year,
+    sydneyNow.monthIndex
+  );
+
   const getAvailableDays = () => {
-    const todayInAu = getAuTime();
-    const currentMonthName = todayInAu.toLocaleString("default", { month: "long" });
-    const monthIndexOffset = months.indexOf(formData.month);
-    const targetDate = getAuTime();
-    targetDate.setMonth(todayInAu.getMonth() + (monthIndexOffset !== -1 ? monthIndexOffset : 0));
-    const year = targetDate.getFullYear();
-    const monthIndex = targetDate.getMonth();
-    const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
-    let startDay = 1;
-    if (formData.month === currentMonthName) startDay = todayInAu.getDate();
-    return Array.from({ length: daysInMonth - startDay + 1 }, (_, i) => startDay + i);
+    if (!selectedMonth) return [];
+
+    const daysInMonth = new Date(
+      selectedMonth.year,
+      selectedMonth.monthIndex + 1,
+      0
+    ).getDate();
+
+    const startDay =
+      selectedMonth.value === currentSydneyMonthValue ? sydneyNow.day : 1;
+
+    return Array.from(
+      { length: daysInMonth - startDay + 1 },
+      (_, index) => startDay + index
+    );
   };
 
   const getAvailableTimes = () => {
-    const todayInAu = getAuTime();
-    const currentMonthName = todayInAu.toLocaleString("default", { month: "long" });
-    const currentDay = todayInAu.getDate();
-    const currentHour = todayInAu.getHours();
-    const isToday = formData.month === currentMonthName && parseInt(formData.day) === currentDay;
-    if (isToday) return allTimeSlots.filter((slot) => slot.hour > currentHour);
+    const isToday =
+      formData.month === currentSydneyMonthValue &&
+      Number(formData.day) === sydneyNow.day;
+
+    if (isToday) {
+      return allTimeSlots.filter((slot) => slot.hour > sydneyNow.hour);
+    }
+
     return allTimeSlots;
   };
 
@@ -123,8 +185,9 @@ const Booking = () => {
         
         const finalData = {
           ...formData,
+          month: selectedMonth?.label || "",
           service: finalService, // Override service field for email
-          date_requested: `${formData.day} ${formData.month} at ${formData.time}`,
+          date_requested: `${formData.day} ${selectedMonth?.label || ""} at ${formData.time}`,
         };
 
         const response = await fetch("https://api.web3forms.com/submit", {
@@ -249,7 +312,15 @@ const Booking = () => {
                     <label className="block text-xs font-bold uppercase tracking-widest text-white/40 mb-2">Month *</label>
                     <div className="relative">
                         <select name="month" value={formData.month} onChange={handleChange} className="w-full bg-transparent border-b border-white/20 p-3 text-white appearance-none focus:border-primary outline-none">
-                            {months.map(m => <option key={m} value={m} className="bg-[#111]">{m}</option>)}
+                            {months.map((month) => (
+                              <option
+                                key={month.value}
+                                value={month.value}
+                                className="bg-[#111]"
+                              >
+                                {month.label}
+                              </option>
+                            ))}
                         </select>
                         <i className="fa-solid fa-chevron-down absolute right-0 top-4 text-white/30 pointer-events-none text-[10px]"></i>
                     </div>

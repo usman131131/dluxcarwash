@@ -89,7 +89,7 @@ const Hero = () => {
           </span>
         </div>
         <h1 className="text-5xl md:text-7xl lg:text-8xl 2xl:text-9xl font-display font-bold leading-[0.9] mb-6 md:mb-10 text-dark">
-          Dluxsss Hand Car Wash
+          Dlux Hand Car Wash
           <br />
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-dark">
             & Detailing
